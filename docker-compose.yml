@@ -1,0 +1,59 @@
+# Adabas + Natural CE for a Blitzy Linux environment.
+#
+# Replaces the two ad-hoc `docker run` commands. Two things change versus the
+# local Mac setup:
+#
+#  1. No `--add-host adabas-db:<LAN IP>`. The service name `adabas-db` resolves
+#     over the compose network, which is what the Natural container's
+#     AdabasClient/config/dbmapping.txt already expects (it maps DBID 11 and 12
+#     to adatcp://ADABAS-DB:60001 - uppercase, but hostname lookups are
+#     case-insensitive). Pinning a host LAN IP would not work on a CI runner.
+#
+#  2. Natural waits for Adabas to report healthy. Both images ship their own
+#     healthcheck, so `service_healthy` is reliable here.
+#
+# Both images are linux/amd64, so on an x86_64 Linux runner they run natively -
+# no emulation, unlike on an Apple Silicon Mac.
+
+services:
+  adabas-db:
+    image: softwareag/adabas-ce:7.4.0
+    container_name: adabas-db
+    environment:
+      ADABAS_DBID: "12"
+      ADABAS_DB_CREATION: demodb
+    # Ports are published only for debugging from the runner itself; Natural
+    # reaches Adabas over the internal network, not through these.
+    ports:
+      - "127.0.0.1:8190:8190"
+      - "127.0.0.1:60001:60001"
+    healthcheck:
+      test: ["CMD-SHELL", "sh /usr/local/bin/healthcheck.sh || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    networks: [adabas_natural]
+
+  natural-ce:
+    image: softwareag/natural-ce:9.3.3
+    container_name: natural-ce
+    depends_on:
+      adabas-db:
+        condition: service_healthy
+    # NDV, for an IDE or remote tooling. Not needed for CLI build/validation.
+    ports:
+      - "127.0.0.1:2700:2700"
+    healthcheck:
+      # NAT_HOME is /opt/softwareag/Natural; spelled out to avoid compose's
+      # $$-escaping rules for a variable that must survive to the container.
+      test: ["CMD-SHELL", "sh /opt/softwareag/Natural/bin/healthcheck.sh || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    networks: [adabas_natural]
+
+networks:
+  adabas_natural:
+    driver: bridge
