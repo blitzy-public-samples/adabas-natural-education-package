@@ -32,38 +32,38 @@ DEFINE DATA LOCAL
      01 MONMAX  (N6.2 / 1:6)
      01 MONAVE  (N6.2 / 1:6)
      01 MONSUM  (N6.2 / 1:6)
-     *
+*
      END-DEFINE
-     *
+*
      WRITE
       PRICE1WEEK (*,1) /  PRICE1WEEK (*,2) /  PRICE1WEEK (*,3) /  
       PRICE1WEEK (*,4) /  PRICE1WEEK (*,5) /  PRICE1WEEK (*,6) /
-     *
+*
       FOR MON-DIM1CNT 1 TO 5
        RESET MONMAX(MON-DIM1CNT) MONSUM(MON-DIM1CNT)
        COMPUTE  MONMIN(MON-DIM1CNT) = 10000
-       *
+*
        FOR BUN-DIM2CNT 1 TO 6
         COMPUTE PRICE1WEEK (MON-DIM1CNT,BUN-DIM2CNT) =
            PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT) 
             + (PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT) * 5 / 100 ) 
-       *
+*
        IF PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT) >  MONMAX(MON-DIM1CNT)
        MOVE PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT) TO MONMAX(MON-DIM1CNT)
         END-IF
-       *
+*
        IF PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT) <  MONMIN(MON-DIM1CNT)
          MOVE PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT) TO MONMIN(MON-DIM1CNT)
        END-IF
-       *
+*
        COMPUTE   MONSUM(MON-DIM1CNT) = MONSUM(MON-DIM1CNT)
           + PRICE1WEEK(MON-DIM1CNT,BUN-DIM2CNT)
-       *
+*
        END-FOR
-       *
+*
        COMPUTE  MONAVE(MON-DIM1CNT) = MONSUM(MON-DIM1CNT) / BUN-DIM2CNT
        END-FOR
-       *
+*
        WRITE
        PRICE1WEEK (*,1) (EM=ZZZZ,ZZ9.99'€')  /  
        PRICE1WEEK (*,2) (EM=ZZZZ,ZZ9.99'€')  /  
@@ -71,10 +71,10 @@ DEFINE DATA LOCAL
        PRICE1WEEK (*,4) (EM=ZZZZ,ZZ9.99'€')  /  
        PRICE1WEEK (*,5) (EM=ZZZZ,ZZ9.99'€')  /  
        PRICE1WEEK (*,6) (EM=ZZZZ,ZZ9.99'€')  /
-       *
+*
        WRITE
          'maximal price  for each month:' /  MONMAX(1:5) (EM=ZZZZ,ZZ9.99'€') /
          'minimal price  for each month:' /  MONMIN(1:5) (EM=ZZZZ,ZZ9.99'€') /
          'average price  for each month:' /  MONAVE(1:5) (EM=ZZZZ,ZZ9.99'€') /
-       *
+*
        END

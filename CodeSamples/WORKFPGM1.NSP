@@ -31,30 +31,30 @@ DEFINE DATA LOCAL
     2 START-HARBOR (A20)
     2 DESTINATION-HARBOR (A20)
     2 PRICE-1W (P10.3)
-    *
+*
       1 #CNT (N8)
       1 INCPERCENT (N3) CONST<5>
       1 INCYEAR    (N1) CONST<2>
     END-DEFINE
-    *
-     DEFINE WORK FILE 1 'C:\FileSystem\Workfiles\CRUISE.CSV'     TYPE 'CSV'
-     DEFINE WORK FILE 2 'C:\FileSystem\Workfiles\CRUISENEW1.CSV' TYPE 'CSV'
-    *
+*
+     DEFINE WORK FILE 1 '/opt/softwareag/Natural/tmp/CRUISE.CSV'     TYPE 'CSV'
+     DEFINE WORK FILE 2 '/opt/softwareag/Natural/tmp/CRUISENEW1.CSV' TYPE 'CSV'
+*
     READ  WORK FILE 1 CRUISERECORD
-     *
+*
      IF DESTINATION-HARBOR = "Skiatos"
         MOVE "Naxos" TO DESTINATION-HARBOR
      END-IF
-      *
+*
      COMPUTE  PRICE-1W = PRICE-1W + ( PRICE-1W * INCPERCENT / 100 )
      COMPUTE START-YEAR = START-YEAR + INCYEAR
      COMPUTE END-YEAR   = END-YEAR   + INCYEAR
-      *
+*
      WRITE WORK 2 CRUISERECORD
-      *
+*
      END-WORK
-      *
+*
      CLOSE WORK FILE 1
      CLOSE WORK FILE 2
-      *
+*
  END
